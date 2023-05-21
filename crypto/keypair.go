@@ -11,55 +11,59 @@ import (
 )
 
 type PublicKey struct{
-	key *ecdsa.PublicKey
+	Key *ecdsa.PublicKey
 }
-
 
 type PrivateKey struct{
-	key *ecdsa.PrivateKey
+	Key *ecdsa.PrivateKey
 }
 
-func GeneratePrivateKey () PrivateKey{
+type Signature struct{
+	R, S *big.Int
+	
+}
+
+// Generate and return Private Key
+func GeneratePrivateKey () PrivateKey {
 	key, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 	if err !=nil {
 		panic(err)
 	}
 	return PrivateKey {
-		key: key,
+		Key: key,
 	}
 }
-
+// Generate and return Public key from the Private Key
 func (k PrivateKey) PublicKey() PublicKey {
-	return PublicKey{
-		key: &k.key.PublicKey,
+	return PublicKey {
+		Key: &k.Key.PublicKey,
 	}
 }
-
+// Helper method/function
 func (k PublicKey) ToSlice () []byte{
-	return elliptic.MarshalCompressed(k.key, k.key.X, k.key.Y)
+	return elliptic.MarshalCompressed(k.Key, k.Key.X, k.Key.Y)
 }
 
+// Generate the Address from the Public Key
 func (k PublicKey) Address () types.Address {
 	h := sha256.Sum256(k.ToSlice())
 	return types.AddressFromBytes(h[len(h)-20:])
-
 }
 
+// Sign the data using the Private key and return the Signature
 func (k PrivateKey) Sign(data []byte) (*Signature, error) {
-	r, s, err := ecdsa.Sign(rand.Reader, k.key, data)
+	r, s, err := ecdsa.Sign(rand.Reader, k.Key, data)
 	if err != nil {
 		return nil, err
 	}
 	return &Signature{
-		r: r,
-		s: s,
+		R: r,
+		S: s,
 	}, nil
 }
-type Signature struct{
-	r, s *big.Int
-	
-}
 
+
+// Verify if the data is signed by the right private key
 func (sig *Signature) Verify(pubkey PublicKey, data []byte) bool {
-	return ecdsa.Verify(pubkey.key, data, sig.r, sig.s)
+	return ecdsa.Verify(pubkey.Key, data, sig.R, sig.S)
 }

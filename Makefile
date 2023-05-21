@@ -3,5 +3,5 @@ build:
 run: build
 	./bin/transport
 test:
-	go test -v ./...
+	go test ./...
 	

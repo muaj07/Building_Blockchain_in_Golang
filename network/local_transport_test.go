@@ -17,11 +17,16 @@ func TestConnect(t *testing.T) {
 func TestSendMessage(t *testing.T) {
 	tra := NewLocalTransport("A")
 	trb := NewLocalTransport("B")
+
 	tra.Connect(trb)
 	trb.Connect(tra)
+
 	msg := []byte("Hello Enoda!" + "\n")
 	assert.Nil(t, tra.SendMessage(trb.addr, msg))
+
 	rpc := <- trb.Consume()
+	buf := make([]byte, len(msg))
+	n, err := 
 	assert.Equal(t, msg, rpc.Payload)
 	assert.Equal(t, tra.addr, rpc.From)	
 }
