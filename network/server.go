@@ -31,7 +31,6 @@ type Server struct {
 	isValidator bool
 	rpcCh chan RPC
 	quitCh chan struct{}
-
 }
 
 // NewServer returns a new instance of Server with the provided options.
@@ -122,7 +121,6 @@ func (s *Server) createNewBlock() error{
 	logrus.Info("Create new Block")
 	return nil
 }
-
 
 // initTransports initializes the transports for the server, 
 // starting a goroutine for each transport to consume RPCs.

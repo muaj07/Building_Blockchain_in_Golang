@@ -46,6 +46,27 @@ func NewDefaultRPCHandler (p RPCProcessor) *DefaultRPCHandler{
 	}
 }
 
+
+// NewMessage creates a new Message struct with the given MessageType and data.
+func NewMessage(t MessageType, data []byte) *Message {
+    // Return a pointer to a new Message struct with the given values.
+    return &Message{
+        Header: t,
+        Data:   data,
+    }
+}
+
+// Bytes returns the gob-encoded byte slice of the Message.
+func (msg *Message) Bytes() []byte {
+    buf := &bytes.Buffer{} // create a new buffer
+    enc := gob.NewEncoder(buf) // create a new encoder that writes to the buffer
+    enc.Encode(msg) // encode the Message into the buffer
+    return buf.Bytes() // return the byte slice of the buffer
+}
+
+
+
+
 // HandleRPC handles the incoming RPC request
 // and returns an error if any.
 func (h *DefaultRPCHandler) HandleRPC(rpc RPC) error {
@@ -55,7 +76,6 @@ func (h *DefaultRPCHandler) HandleRPC(rpc RPC) error {
     if err := gob.NewDecoder(rpc.Payload).Decode(&msg); err != nil {
         return fmt.Errorf("Failed to Decode Message from (%s): %s", rpc.From, err)
     }
-
     switch msg.Header {
     case MessageTypeTx:
         // Decode the transaction data from the message
@@ -71,21 +91,7 @@ func (h *DefaultRPCHandler) HandleRPC(rpc RPC) error {
     return nil
 }
 
-
-
 func (p *DefaultRPCHandler) ProcessTransaction(from NetAddr, tx *core.Transaction) error{
 	return nil
 }
 
-func NewMessage (t MessageType, data []byte) *Message{
-	return &Message{
-		Header: t,
-		Data: data,
-	}
-}
-func (msg *Message) Bytes() []byte {
-	buf := &bytes.Buffer{}
-	enc := gob.NewEncoder(buf)
-	enc.Encode(msg)
-	return buf.Bytes()
-}

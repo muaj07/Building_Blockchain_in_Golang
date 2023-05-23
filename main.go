@@ -1,6 +1,5 @@
 package main 
 import
-
 (
 "github.com/muaj07/transport/network"
 "github.com/muaj07/transport/core"
@@ -40,9 +39,10 @@ s.Start()
 
 func SendTransaction(tr network.Transport, to network.NetAddr) error {
 	privKey := crypto.GeneratePrivateKey()
+	// Generate a random number (based 10) and convert it to string
 	data:= []byte(strconv.FormatInt(int64(rand.Intn(1000000)), 10))
 	tx := core.NewTransaction(data)
-	//tx.SetFirstSeen(time.Now().UnixNano())
+	tx.SetFirstSeen(time.Now().UnixNano())
 	tx.Sign(privKey)
 	buf := &bytes.Buffer{}
 	if err := tx.Encode(core.NewGobTxEncoder(buf)); err !=nil {
@@ -51,5 +51,6 @@ func SendTransaction(tr network.Transport, to network.NetAddr) error {
 	// NewMessage in the rpc.go file of the network
 	msg := network.NewMessage(network.MessageTypeTx, buf.Bytes())
 	// SendMessage is inside local_transport.go file of the Transport folder
+	// msg.Bytes() is a method in rpc.go file
 	return tr.SendMessage(to, msg.Bytes())
 }

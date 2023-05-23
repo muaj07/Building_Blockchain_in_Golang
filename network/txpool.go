@@ -63,6 +63,13 @@ func (t *TxPool) AddTx(tx *core.Transaction) error {
     return nil
 }
 
+// RemoveTx removes a transaction from the transaction pool
+func (t *TxPool) RemoveTx(tx *core.Transaction) error {
+	hash := tx.Hash(core.TxHasher{})
+	delete(t.transactions, hash)
+	return nil
+}
+
 // Has checks if a transaction with a given hash exists in the pool.
 // Returns true if the transaction exists, false otherwise.
 func (t *TxPool) Has(hash types.Hash) bool{
