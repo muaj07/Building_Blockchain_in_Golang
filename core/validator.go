@@ -43,7 +43,7 @@ func (bv *BlockValidator) ValidateBlock(b *Block) error {
         return fmt.Errorf("Chain already contains block(%d) with Hash (%s)", b.Height, b.Hash(BlockHasher{}))
     }
 	if b.Height != bv.bc.Height()+1{
-		return fmt.Errorf("Block (%d) with Hash (%s) too high from the current height (%d) of the blockchain", b.Height, b.Hash(BlockHasher{}),bv.bc.Height()+1)
+		return fmt.Errorf("Block (%s) with Height => (%d) is too high, Current height (%d)", b.Hash(BlockHasher{}), b.Height, bv.bc.Height()+1)
 	}
 	prevHeader, err := bv.bc.GetHeader(b.Height-1)
 	if err != nil {

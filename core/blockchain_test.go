@@ -4,10 +4,11 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/muaj07/transport/types"
+	"github.com/go-kit/log"
 	//"github.com/muaj07/transport/crypto"
 )
 
-
+var Logger log.Logger
 
 //This code snippet defines a function called newBlockchainWithGenesis 
 //that takes a *testing.T pointer as an argument and returns a *Blockchain pointer. 
@@ -20,7 +21,7 @@ import (
 // It takes a testing object as an argument and returns a pointer to the new blockchain.
 func newBlockchainWithGenesis(t *testing.T) *Blockchain {
     // Create a new blockchain with a random genesis block.
-    bc, err := NewBlockchain(randomBlock(0, types.Hash{}))
+    bc, err := NewBlockchain(Logger, randomBlock(t, 0, types.Hash{}))
     // If there was an error, fail the test.
     assert.Nil(t, err)
     // Return the new blockchain.
@@ -31,7 +32,7 @@ func newBlockchainWithGenesis(t *testing.T) *Blockchain {
 // It takes in a testing.T object, a Blockchain pointer, and a height of the block
 func getPrevBlockHash (t *testing.T, bc *Blockchain, height uint32) types.Hash{
 	prevHeader, err := bc.GetHeader(height-1)
-	assert.Nil(t,err)
+	assert.Nil(t, err)
 	return BlockHasher{}.Hash(prevHeader)
 }
 
@@ -52,11 +53,11 @@ func TestAddBlock(t *testing.T){
 	 bc := newBlockchainWithGenesis(t)
 	 lenBlocks := 100
 	 for i:=0; i<lenBlocks; i++{
-		block := randomBlockWithSignature(t, uint32(i+1), getPrevBlockHash(t, bc, uint32(i+1)))
+		block := randomBlock(t, uint32(i+1), getPrevBlockHash(t, bc, uint32(i+1)))
 	 	assert.Nil(t, bc.AddBlock(block))
 	 }
 	 assert.Equal(t, len(bc.headers), lenBlocks+1)
-	 assert.NotNil(t, bc.AddBlock(randomBlock(89, types.Hash{})))
+	 assert.NotNil(t, bc.AddBlock(randomBlock(t, 89, types.Hash{})))
 }
 
 // TestHasBlock tests the HasBlock method of the Blockchain struct
@@ -73,5 +74,5 @@ func TestHasBlock(t *testing.T) {
 
 func TestAddBlockTooHigh (t *testing.T) {
 	bc := newBlockchainWithGenesis(t)
-	assert.NotNil(t, bc.AddBlock(randomBlockWithSignature(t, 3, types.Hash{})))
+	assert.NotNil(t, bc.AddBlock(randomBlock(t, 3, types.Hash{})))
 }

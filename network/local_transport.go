@@ -26,6 +26,14 @@ func NewLocalTransport(addr NetAddr) *LocalTransport {
     }
 }
 
+func(t *LocalTransport) Broadcast(payload []byte) error{
+	for _, peer := range t.peers {
+		if err := t.SendMessage(peer.Addr(), payload); err!=nil {
+			return err
+		}
+	}
+	return nil
+}
 // Consume returns a channel that can be used to receive RPCs from the local transport.
 func (t *LocalTransport) Consume() <- chan RPC {
 	return t.ConsumeCh
@@ -46,7 +54,7 @@ func (t *LocalTransport) SendMessage(to NetAddr, payload []byte) error {
     // Attempt to find the peer in the map.
     peer, ok := t.peers[to]
     if !ok {
-        return fmt.Errorf("Error! %s could not send Msg to %s", t.addr, to)
+        return fmt.Errorf("Error! %s could not send Msg to inknown peer: %s", t.addr, to)
     }
 
     // Send the message via the peer's ConsumeCh channel.
