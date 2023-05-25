@@ -3,7 +3,6 @@ package network
 import (
 	"sync"
 	"fmt"
-	//"io"
 	"bytes"
 )
 
@@ -54,10 +53,10 @@ func (t *LocalTransport) SendMessage(to NetAddr, payload []byte) error {
     // Attempt to find the peer in the map.
     peer, ok := t.peers[to]
     if !ok {
-        return fmt.Errorf("Error! %s could not send Msg to inknown peer: %s", t.addr, to)
+        return fmt.Errorf("Error! %s could not send Msg to unknown Peer: %s", t.addr, to)
     }
 
-    // Send the message via the peer's ConsumeCh channel.
+    // Send the message via the peer's ConsumeCh channel
     peer.ConsumeCh <- RPC {
         From: t.addr,
         Payload: bytes.NewReader(payload),

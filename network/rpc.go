@@ -36,6 +36,8 @@ type DecodeMessage struct{
 	Data any
 }
 
+//This code declares a new type "RPCDecodeFunc" which is a function that takes  
+//an "RPC" parameter and returns a pointer to a "DecodeMessage" and an error
 type RPCDecodeFunc func(RPC) (*DecodeMessage, error)
 
 type RPCProcessor interface{
@@ -46,7 +48,7 @@ type RPCProcessor interface{
 func NewMessage(t MessageType, data []byte) *Message {
     // Return a pointer to a new Message struct with the given values.
     return &Message {
-        Header: t,
+        Header: t, //Message type 
         Data: data,
     }
 }
@@ -65,17 +67,17 @@ func DefaultRPCDecodeFunc(rpc RPC) (*DecodeMessage, error) {
     msg := Message{}
     // Decode the payload into the message struct
     if err := gob.NewDecoder(rpc.Payload).Decode(&msg); err != nil {
-        return nil, fmt.Errorf("Failed to Decode Message from (%s): %s", rpc.From, err)
+        return nil, fmt.Errorf("Failed to Decode Message from --> %s Error %s", rpc.From, err)
     }
 	logrus.WithFields(logrus.Fields{
 		"Message Type": msg.Header,
-		"from": rpc.From,
-	}).Debug("New incoming Msg")
+		"From": rpc.From,
+	}).Debug("New Incoming Msg")
 
     switch msg.Header {
     case MessageTypeTx:
         // Decode the transaction data from the "MessageTypeTx" message
-        tx := new(core.Transaction)
+        tx := new(core.Transaction) // Transaction is a struct
         if err := tx.Decode(core.NewGobTxDecoder(bytes.NewReader(msg.Data))); err != nil {
             return nil, err
         }
@@ -98,7 +100,7 @@ func DefaultRPCDecodeFunc(rpc RPC) (*DecodeMessage, error) {
             
         }, nil
     default:
-        return nil, fmt.Errorf("Invalid Message header %x", msg.Header)
+        return nil, fmt.Errorf("INVALID Message Header %x", msg.Header)
     }
 
 }

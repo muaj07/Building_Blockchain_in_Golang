@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"github.com/go-kit/log"
 	"sync"
-	
+	"os"
 )
 
 type Blockchain struct{
@@ -13,15 +13,17 @@ type Blockchain struct{
 	lock  sync.RWMutex
 	headers []*Header
 	validator Validator
+	contractState *State //An interface
 }
 
 // NewBlockchain creates a new instance of the Blockchain struct and returns a pointer to it.
 //
 // Returns:
 // *Blockchain: A pointer to the newly created Blockchain instance.
-func NewBlockchain (l log.Logger, genesis *Block) (*Blockchain, error){
+func NewBlockchain (genesis *Block) (*Blockchain, error){
 	bc:= &Blockchain{
-		logger: l,
+		contractState: NewState(),
+		logger: log.NewLogfmtLogger(os.Stderr),
 		store: NewMemoryStorage(),
 		headers: []*Header{},
 		//Separate the "initialization" of the validator field and set it 
@@ -45,6 +47,24 @@ func (bc *Blockchain) AddBlock(b *Block) error {
     if err := bc.validator.ValidateBlock(b); err != nil {
         return err
     }
+
+	//Add the VM instance
+	for _ , tx := range b.Transactions {
+		// bc.logger.Log(
+		// 	"msg", "Executing code",
+		// 	"hash", tx.Hash(&TxHasher{}),
+		// )
+
+		vm := NewVM(tx.Data, bc.contractState)
+		if err := vm.Run(); err !=nil{
+			return err
+		}
+		//result := vm.stack.Pop() //the only value stored on the stack
+		// bc.logger.Log(
+		// 	"Contract State Result", vm.contractState,
+		// )
+		fmt.Printf("CONTRACT STATE: %+v\n", vm.contractState)
+	}
     // Add the block to the blockchain.
     return bc.AddBlockWithoutValidation(b)
 }
@@ -52,7 +72,7 @@ func (bc *Blockchain) AddBlock(b *Block) error {
 
 func (bc *Blockchain) GetHeader (height uint32) (*Header, error) {
 	if height > bc.Height(){
-		return nil, fmt.Errorf("Given height (%d) is too high", height)
+		return nil, fmt.Errorf("Given Block Height (%d) is too high!", height)
 	}
 	bc.lock.Lock()
 	defer bc.lock.Unlock()
@@ -67,15 +87,15 @@ func (bc *Blockchain) AddBlockWithoutValidation(b *Block) error {
     bc.headers = append(bc.headers, b.Header) // append the block's header to the headers slice
 	bc.lock.Unlock()
 	bc.logger.Log (
-		"msg", "new block",
-		"hash", b.Hash(BlockHasher{}),
-		"height", b.Height,
-		"transactions", len(b.Transactions), 
+		"Msg", "New Block",
+		"Hash", b.Hash(BlockHasher{}),
+		"Height", b.Height,
+		"Transactions", len(b.Transactions), 
 	)
     return bc.store.Put(b) // store the block in the blockchain's store
 }
 
-// Height returns the current height of the blockchain.
+// Height returns the current Height of the blockchain.
 // This function does not take any parameters.
 // It returns a uint32 value representing the height of the blockchain.
 func (bc *Blockchain) Height() uint32{

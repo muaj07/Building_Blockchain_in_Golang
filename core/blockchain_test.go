@@ -4,11 +4,11 @@ import (
 	"testing"
 	"github.com/stretchr/testify/assert"
 	"github.com/muaj07/transport/types"
-	"github.com/go-kit/log"
+	//"github.com/go-kit/log"
 	//"github.com/muaj07/transport/crypto"
 )
 
-var Logger log.Logger
+
 
 //This code snippet defines a function called newBlockchainWithGenesis 
 //that takes a *testing.T pointer as an argument and returns a *Blockchain pointer. 
@@ -21,7 +21,7 @@ var Logger log.Logger
 // It takes a testing object as an argument and returns a pointer to the new blockchain.
 func newBlockchainWithGenesis(t *testing.T) *Blockchain {
     // Create a new blockchain with a random genesis block.
-    bc, err := NewBlockchain(Logger, randomBlock(t, 0, types.Hash{}))
+    bc, err := NewBlockchain(randomBlock(t, 0, types.Hash{}))
     // If there was an error, fail the test.
     assert.Nil(t, err)
     // Return the new blockchain.

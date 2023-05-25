@@ -3,7 +3,6 @@ package core
 import (
 //"encoding/binary"
 "github.com/muaj07/transport/types"
-//"io"
 "bytes"
 "crypto/sha256"
 "fmt"

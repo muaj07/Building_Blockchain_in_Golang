@@ -58,10 +58,10 @@ func (tx *Transaction) Sign(privkey crypto.PrivateKey) error{
 
 func (tx *Transaction) Verify() error {
 	if tx.Signature == nil{
-		return fmt.Errorf ("Transaction signature is Nil")
+		return fmt.Errorf ("Transaction Signature is Nil")
 	}
 	if !tx.Signature.Verify(tx.From, tx.Data) {
-		return fmt.Errorf ("Invalid transaction signature")
+		return fmt.Errorf ("INVALID Transaction Signature")
 	}
 	return nil
 }
@@ -83,7 +83,7 @@ func (tx *Transaction) Decode(dec Decoder[*Transaction]) error{
 func (tx *Transaction) Encode(enc Encoder[*Transaction]) error{
 	return enc.Encode(tx)
 }
-func (tx *Transaction) SetFirstSeen (t int64) {
+func (tx *Transaction) SetFirstSeen(t int64) {
 	tx.firstSeen = t
 }
 

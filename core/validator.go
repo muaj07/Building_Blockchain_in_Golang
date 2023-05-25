@@ -3,9 +3,6 @@ import (
 	"fmt"
 )
 
-
-
-
 type Validator interface {
 	// ValidateBlock checks if a given block is valid
 	ValidateBlock(*Block) error
@@ -23,7 +20,7 @@ type BlockValidator struct{
 // - (*BlockValidator): a pointer to the newly created BlockValidator instance.
 func NewBlockValidator (bc *Blockchain) *BlockValidator{
 	return &BlockValidator {
-		bc:bc,
+		bc: bc,
 	}
 }
 
@@ -39,11 +36,12 @@ func NewBlockValidator (bc *Blockchain) *BlockValidator{
 // - error: an error that occurred during validation, or nil if validation succeeded.
 func (bv *BlockValidator) ValidateBlock(b *Block) error {
     // Check if the block is already present in the chain.
+
     if bv.bc.HasBlock(b.Height) {
-        return fmt.Errorf("Chain already contains block(%d) with Hash (%s)", b.Height, b.Hash(BlockHasher{}))
+        return fmt.Errorf("Chain already contains Block#%d with Hash ==> %s", b.Height, b.Hash(BlockHasher{}))
     }
 	if b.Height != bv.bc.Height()+1{
-		return fmt.Errorf("Block (%s) with Height => (%d) is too high, Current height (%d)", b.Hash(BlockHasher{}), b.Height, bv.bc.Height()+1)
+		return fmt.Errorf("Block ==> %s with Height # %d is too high, Current height ==>%d)", b.Hash(BlockHasher{}), b.Height, bv.bc.Height()+1)
 	}
 	prevHeader, err := bv.bc.GetHeader(b.Height-1)
 	if err != nil {
@@ -51,11 +49,12 @@ func (bv *BlockValidator) ValidateBlock(b *Block) error {
 	}
 	hash := BlockHasher{}.Hash(prevHeader)
 	if hash != b.PrevBlockHash{
-		return fmt.Errorf("The hash of Previous Block (%s) is not valid", b.PrevBlockHash)
+		return fmt.Errorf("The hash %s of Previous Block is INVALID", b.PrevBlockHash)
 	}
     // Verify the block's signature.
     if err := b.Verify(); err!= nil{
         return err
     }
+	fmt.Printf("Done Basic Verification for Block#%d\n", b.Height)
     return nil
 }

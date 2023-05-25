@@ -10,7 +10,7 @@ import (
 func TestSignTransaction(t *testing.T) {
 	privKey :=crypto.GeneratePrivateKey()
 	tx := &Transaction{
-		Data: []byte("First test trx."),
+		Data: []byte{0x02,0x0a, 0x02, 0x0a, 0x0b},
 	}
 	assert.Nil(t,tx.Sign(privKey))
 	assert.NotNil(t, tx.Signature)
@@ -20,7 +20,7 @@ func TestSignTransaction(t *testing.T) {
 func TestVerifyTransaction(t *testing.T) {
 	privKey :=crypto.GeneratePrivateKey()
 	tx := &Transaction{
-		Data: []byte("First test trx."),
+		Data: []byte{0x02,0x0a, 0x02, 0x0a, 0x0b},
 	}
 	assert.Nil(t,tx.Sign(privKey))
 	assert.Nil(t,tx.Verify())
@@ -42,7 +42,7 @@ func TestTxEncodeDecode(t *testing.T){
 func randomTxWithSignature (t *testing.T) *Transaction {
 	privKey := crypto.GeneratePrivateKey()
 	tx := Transaction {
-		Data: []byte("First test trx with Signature"),
+		Data: []byte{0x02,0x0a, 0x02, 0x0a, 0x0b},
 	}
 	assert.Nil(t, tx.Sign(privKey))
 	return &tx
