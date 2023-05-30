@@ -7,6 +7,7 @@ import(
 	"io"
 	"bytes"
 	"fmt"
+    "net"
 )
 
 type MessageType byte
@@ -15,10 +16,12 @@ const(
 	MessageTypeTx MessageType = 0x1
 	MessageTypeBlock MessageType = 0x2
     MessageTypeGetBlocks MessageType = 0x3
+    MessageTypeStatus MessageType = 0x4
+    MessageTypeGetStatus MessageType = 0x5
 )
 
 type RPC struct {
-	From NetAddr
+	From net.Addr
 	Payload io.Reader
 }
 type RPCHandler interface {
@@ -32,7 +35,7 @@ type Message struct{
 }
 
 type DecodeMessage struct{
-	From NetAddr
+	From net.Addr
 	Data any
 }
 
@@ -99,6 +102,23 @@ func DefaultRPCDecodeFunc(rpc RPC) (*DecodeMessage, error) {
             Data: b,
             
         }, nil
+
+    case MessageTypeGetStatus:
+        return &DecodeMessage{
+            From: rpc.From,
+            Data: &GetStatusMessage{},
+        }, nil
+
+    case MessageTypeStatus:
+        statusMessage := new(StatusMessage)
+        if err := gob.NewDecoder(bytes.NewReader(msg.Data)).Decode(statusMessage); err!= nil{
+            return nil, err
+        }
+        return &DecodeMessage{
+            From: rpc.From,
+            Data: statusMessage,
+        }, nil
+
     default:
         return nil, fmt.Errorf("INVALID Message Header %x", msg.Header)
     }

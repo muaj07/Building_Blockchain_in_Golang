@@ -63,7 +63,9 @@ func (bc *Blockchain) AddBlock(b *Block) error {
 		// bc.logger.Log(
 		// 	"Contract State Result", vm.contractState,
 		// )
-		fmt.Printf("CONTRACT STATE: %+v\n", vm.contractState)
+		//fmt.Printf("CONTRACT STATE: %+v\n", vm.contractState)
+		//result := vm.stack.Pop()
+		//fmt.Printf ("VM RESULT: %+v\n", result)
 	}
     // Add the block to the blockchain.
     return bc.AddBlockWithoutValidation(b)

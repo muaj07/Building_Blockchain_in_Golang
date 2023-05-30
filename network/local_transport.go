@@ -4,24 +4,25 @@ import (
 	"sync"
 	"fmt"
 	"bytes"
+    "net"
 )
 
 type LocalTransport struct {
-	addr NetAddr
+	addr net.Addr
 	ConsumeCh chan RPC
 	lock sync.RWMutex
-	peers map[NetAddr]*LocalTransport
+	peers map[net.Addr]*LocalTransport
 }
 
 // NewLocalTransport creates a new instance of the LocalTransport struct
-// with the specified NetAddr and initializes its fields
-func NewLocalTransport(addr NetAddr) *LocalTransport {
-    // Initialize a new LocalTransport struct with the specified NetAddr
+// with the specified net.Addr and initializes its fields
+func NewLocalTransport(addr net.Addr) *LocalTransport {
+    // Initialize a new LocalTransport struct with the specified net.Addr
     // and default values for its fields
     return &LocalTransport {
         addr:      addr,
         ConsumeCh: make(chan RPC, 1024),
-        peers:     make(map[NetAddr]*LocalTransport),
+        peers:     make(map[net.Addr]*LocalTransport),
     }
 }
 
@@ -38,17 +39,20 @@ func (t *LocalTransport) Consume() <- chan RPC {
 	return t.ConsumeCh
 }
 // Addr returns the network address of the local transport.
-func (t *LocalTransport) Addr() NetAddr {
+func (t *LocalTransport) Addr() net.Addr {
 	return t.addr
 }
 
 // SendMessage sends an RPC message to the specified peer.
 // The `to` parameter is the address of the peer.
 // The `payload` parameter is the Data to send.
-func (t *LocalTransport) SendMessage(to NetAddr, payload []byte) error {
+func (t *LocalTransport) SendMessage(to net.Addr, payload []byte) error {
     // Lock the peers map to prevent concurrent access.
     t.lock.RLock()
     defer t.lock.RUnlock()
+    if t.addr==to{
+        return nil
+    }
 
     // Attempt to find the peer in the map.
     peer, ok := t.peers[to]

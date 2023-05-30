@@ -1,11 +1,12 @@
 package network
+import "net"
 
-type NetAddr string
+//type NetAddr string
 
 type Transport interface {
 	Connect(Transport) error
 	Consume()	<- chan RPC
-	SendMessage(NetAddr, []byte) error
+	SendMessage(net.Addr, []byte) error
 	Broadcast([]byte) error
-	Addr() NetAddr
+	Addr() net.Addr
 }

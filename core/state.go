@@ -4,7 +4,6 @@ import "fmt"
 
 type State struct{
 	data map[string][]byte
-
 }
 
 func NewState () *State{

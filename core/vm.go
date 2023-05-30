@@ -14,6 +14,9 @@ const (
 	InstrPack		 Instruction = 0x0d //13
 	InstrSub		 Instruction = 0x0e //14
 	InstrStore		 Instruction = 0x0f //15
+	InstrGet		 Instruction = 0xae 
+	InstrMul		 Instruction = 0xea
+	InstrDiv		 Instruction = 0xfd 
 )
 
 type Stack struct{
@@ -22,24 +25,26 @@ type Stack struct{
 }
 
 func NewStack(size int) *Stack{
-	return &Stack {
+	return &Stack{
 		data: make([]any, size),
 		sp: 0,
 	}
 }
 
 func (s *Stack) Push(v any) {
-	s.data[s.sp]=v
+	//s.data[s.sp]=v
+	s.data = append([]any{v},s.data...)
 	s.sp++
 }
 
+// Pop removes and returns the top element of the stack.
+// If the stack is empty, it returns the zero value of the element type.
 func (s *Stack) Pop() any {
-	value := s.data[0]
-	s.data = append(s.data[:0], s.data[1:]...)
-	s.sp--
-	return value
+    value := s.data[0] // get the top element
+    s.data = append(s.data[:0], s.data[1:]...) // remove the top element
+    s.sp-- // decrement the stack pointer
+    return value // return the top element
 }
-
 
 type VM struct{
 	data	[]byte
@@ -54,7 +59,7 @@ func NewVM(data []byte, contractState *State) *VM{
 			ip: 0,
 			stack: NewStack(128),
 			contractState: contractState,
-}
+	}
 }
 
 func(vm *VM) Run() error{
@@ -74,6 +79,14 @@ func(vm *VM) Run() error{
 
 func(vm *VM) Exec(instr Instruction) error{
 	switch instr {
+	
+	case InstrGet:
+		key := vm.stack.Pop().([]byte)
+		value, err := vm.contractState.Get(key)
+		if err !=nil{
+			return err
+		}
+		vm.stack.Push(value)
 	case InstrStore:
 		var (
 			key             = vm.stack.Pop().([]byte)
@@ -115,8 +128,19 @@ func(vm *VM) Exec(instr Instruction) error{
 		b := vm.stack.Pop().(int)
 		c := a + b
 		vm.stack.Push(c)
-	}
 
+	case InstrMul:
+		a := vm.stack.Pop().(int)
+		b := vm.stack.Pop().(int)
+		c := a * b
+		vm.stack.Push(c)
+
+	case InstrDiv:
+		a := vm.stack.Pop().(int)
+		b := vm.stack.Pop().(int)
+		c := a / b
+		vm.stack.Push(c)
+	}
 	return nil
 }
 
