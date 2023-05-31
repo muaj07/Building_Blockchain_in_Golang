@@ -5,7 +5,7 @@ import (
 	"github.com/muaj07/transport/crypto"
 	"github.com/muaj07/transport/core"
 	"github.com/go-kit/log"
-	"github.com/muaj07/transport/types"
+	//"github.com/muaj07/transport/types"
 	//"encoding/gob"
 	"bytes"
 	"os"
@@ -27,10 +27,6 @@ type ServerOpts struct {
 	PrivateKey *crypto.PrivateKey
 }
 
-// The Server struct contains some fields, including ServerOpts
-// (a field of another struct type), a blockTime duration, a
-// pointer to a TxPool struct, a boolean field, and two channels
-// (one for receiving RPC messages and another for quitting).
 
 type Server struct {
 	TCPTransport *TCPTransport
@@ -44,9 +40,7 @@ type Server struct {
 	quitCh chan struct{}
 }
 
-// NewServer returns a new instance of Server with the provided options.
-// If block time is not set, use default block time.
-// Set default RPC handler if none is provided.
+
 func NewServer(opts ServerOpts) (*Server, error) {
 	if opts.Logger == nil{
 		opts.Logger = log.NewLogfmtLogger(os.Stderr)
@@ -60,26 +54,23 @@ func NewServer(opts ServerOpts) (*Server, error) {
     if opts.RPCDecodeFunc == nil {
         opts.RPCDecodeFunc = DefaultRPCDecodeFunc
     }
-	chain, err := core.NewBlockchain(genesisBlock())
+	chain, err := core.NewBlockchain(core.GenesisBlock())
 	if err != nil {
 		return nil, err
 	}
 	peerCh := make(chan *TCPPeer)
-	tr := NewTCPTransport(opts.ListenAddr, peerCh)
+
 
     // Create a new server instance.
     s := &Server{
-		TCPTransport: tr,
-		peerCh: peerCh, 
+		TCPTransport: NewTCPTransport(opts.ListenAddr, peerCh),
 		peerMap:	make(map[net.Addr]*TCPPeer),
         ServerOpts: opts,
 		chain : chain,
-		//Initial size of the memPool set to 100 txs
-        memPool:    NewTxPool(100),
-        // Validator needs privatekey to sign the blocks
-        isValidator: opts.PrivateKey != nil,
+        memPool:    NewTxPool(100), //Initial size of the memPool set to 100 txs
+        isValidator: opts.PrivateKey != nil, //Validator needs privatekey to sign the blocks
         rpcCh:       make(chan RPC),
-        quitCh:      make(chan struct{}, 1),
+        quitCh:      make(chan struct{}),
     }
 	s.TCPTransport.peerCh = peerCh
     // if there is no processor assigned in the Server options
@@ -90,82 +81,11 @@ func NewServer(opts ServerOpts) (*Server, error) {
 	if s.isValidator{
 		go s.validatorLoop()
 	}
-	
     // Return the server instance.
     return s, nil
 }
 
-func (s *Server) bootStrapNetwork(){
-	for _, addr := range s.SeedNodes{
-		fmt.Println("trying to connect ", addr)
-		go func(addr string) {
-			conn, err := net.Dial("tcp", addr)
-			if err!=nil{
-				fmt.Printf("Could not Connect to %+v\n", conn)
-				return
-			}
-			s.peerCh <- &TCPPeer{
-				conn: conn,
-			}
-		}(addr)
-	}
-}
-// Start starts the server.
-// It initializes the transports, starts the ticker, and listens for incoming RPC requests.
-// If the server is a validator, it creates a new block for each tick of the ticker.
-func (s *Server) Start() {
-    // Initialize TCP Transport
-    s.TCPTransport.Start() 
-	time.Sleep(1 * time.Second)
-	s.bootStrapNetwork()
 
-	s.Logger.Log(
-		"msg", "Accepting TCP connection on ",
-		"addr", s.ListenAddr,
-		"id", s.ID,
-	)
-
-    // free is the name for the for loop
-free:
-    for {
-        select {
-		case peer := <-s.peerCh:
-			//TODO Add MUTUX 
-			s.peerMap[peer.conn.RemoteAddr()] = peer
-			go peer.readLoop(s.rpcCh)
-			fmt.Printf("New Peer ---> %+v\n", peer)
-        // Handle incoming RPC requests
-        case rpc := <-s.rpcCh:
-			//the msg is decoded and contain the Transaction struct, which is
-			//defined in "transaction.go" file of the Core Package
-			msg, err := s.RPCDecodeFunc(rpc)
-            if err != nil {
-                s.Logger.Log(
-					"Error", err,
-				)
-				continue
-            }
-			// "RPCProcessor" is an interface with single method "ProcessMessage"
-			// defined in the "rpc.go" file.
-			// The server implement the "RPCProcessor" interface below
-			// in this file
-			if err := s.RPCProcessor.ProcessMessage(msg); err!=nil {
-				if err!= core.ErrBlockKnown{
-				s.Logger.Log(
-					"Error", err,
-				)
-				}
-			}
-        // Quit gracefully if quitCh is closed
-        case <-s.quitCh:
-            break free // break the free for loop
-        }
-    }
-    // Print message after server is shut down
-	s.Logger.Log(
-		"msg", "Server Shutting down",
-	)
-}
 
 
 // func (s *Server) bootStrapNodes(){
@@ -404,20 +324,5 @@ func (s *Server) broadcast(Payload []byte) error {
 }
 
 
-// genesisBlock creates and returns the first block of the blockchain.
-func genesisBlock() *core.Block {
-    // Create the header for the block.
-    header := &core.Header{
-        Version:  1,             // The version number of the blockchain.
-        DataHash: types.Hash{},  // The hash of the block's data.
-        Height:   0,             // The height of the block in the blockchain.
-        TimeStamp: 00000,       // The Unix timestamp of when the block was created.
-    }
-    // Create the block using the header.
-	// No tx included in the NewBlock since this is a Genesis block
-    b, _ := core.NewBlock(header, nil)
 
-    // Return the block.
-    return b
-}
 

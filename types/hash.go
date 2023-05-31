@@ -4,29 +4,53 @@ import (
  	"crypto/rand"
 	"encoding/hex"
 )
-
+//Hash is an array of 32 unsigned 8-bit integers
 type Hash [32]uint8
 
+// IsZero checks if a given Hash is zero.
+// A Hash is considered zero if all 32 bytes are zero.
 func (h Hash) IsZero() bool {
-	for i :=0; i<32; i++{
-		if h[i] != 0 {
-			return false
-		}
-	}
-	return true
+    // Iterate over all 32 bytes of the hash.
+    for i := 0; i < 32; i++ {
+        // If this byte is not zero, the hash is not zero.
+        if h[i] != 0 {
+            return false
+        }
+    }
+    // If all 32 bytes were zero, the hash is zero.
+    return true
 }
 
+
+// ToSlice converts a Hash to a byte slice.
 func (h Hash) ToSlice() []byte {
-	b := make([]byte, 32)
-	for i :=0; i<32; i++ {
-		b[i] = h[i]
-	}
-	return b
+    // Initialize a byte slice with 32 bytes.
+    b := make([]byte, 32)
+    // Iterate over each byte of the Hash and copy it to the byte slice.
+    for i := 0; i < 32; i++ {
+        b[i] = h[i]
+    }
+    // Return the resulting byte slice.
+    return b
 }
 
-func (h Hash) String() string{
-	return hex.EncodeToString(h.ToSlice())
+
+
+
+
+// String returns a string representation of the Hash.
+func (h Hash) String() string {
+    // Convert the Hash to a byte slice.
+    byteSlice := h.ToSlice()
+
+    // Encode the byte slice as a hex string.
+    hexString := hex.EncodeToString(byteSlice)
+
+    // Return the hex string.
+    return hexString
 }
+
+
 
 
 // HashFromBytes takes a byte slice b and returns a Hash.
@@ -34,12 +58,15 @@ func (h Hash) String() string{
 func HashFromBytes(b []byte) Hash {
     // Check if the length of b is 32
     if len(b) != 32 {
+        // If the length of b is not 32, create an error message with the length of b and panic
         msg := fmt.Sprintf("Given bytes with length %d should be 32", len(b))
         panic(msg)
     }
 
-    // Copy the bytes to a new array of length 32
+    // Create a new array of length 32
     var value [32]uint8
+
+    // Copy the bytes from b to the new array
     for i := 0; i < 32; i++ {
         value[i] = b[i]
     }
@@ -47,6 +74,10 @@ func HashFromBytes(b []byte) Hash {
     // Convert the array to a Hash and return it
     return Hash(value)
 }
+
+
+
+
 
 // RandomRead returns a slice of random bytes of the given size
 func RandomRead(size int) []byte {

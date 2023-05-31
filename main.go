@@ -14,14 +14,7 @@ import
 )
 
 var Logger log.Logger
-// var transports = []network.Transport{
-// 	network.NewLocalTransport("LOCAL"),
-// 	// network.NewLocalTransport("REMOTE_A"),
-// 	// network.NewLocalTransport("REMOTE_B"),
-// 	// network.NewLocalTransport("REMOTE_C"),
-// 	network.NewLocalTransport("REMOTE_LATE"),
 
-//}
 
 
 // main is the entry point of the program
@@ -45,6 +38,30 @@ func main() {
     select {}
 }
 
+
+// makeServer creates and returns a new network server with the specified ID, transport, and private key.
+func makeServer(id string, privkey *crypto.PrivateKey, addr string, seedNodes []string) *network.Server{
+
+    // Set the server options.
+    opts := network.ServerOpts{
+		SeedNodes: seedNodes,
+		ListenAddr: addr, //source address
+        ID:         id,
+        PrivateKey: privkey,
+    }
+
+    // Create the new server.
+    s, err := network.NewServer(opts)
+
+    // Log any errors that occurred during server creation.
+    if err != nil {
+        Logger.Log(
+            "Error", err,
+        )
+    }
+    // Return the new server.
+    return s
+}
 
 
 // tcpTester tests a TCP connection by dialing to port 3000 and sending a message.
@@ -71,32 +88,6 @@ func tcpTester() {
     if err != nil {
         panic(err)
     }
-}
-
-// makeServer creates and returns a new network server with the specified ID, transport, and private key.
-func makeServer(id string, privkey *crypto.PrivateKey, addr string, seedNodes []string) *network.Server{
-
-    // Set the server options.
-    opts := network.ServerOpts{
-		SeedNodes: seedNodes,
-		ListenAddr: addr,
-		//TCPTransport: network.NewTCPTransport(":3000"),
-        ID:         id,
-        PrivateKey: privkey,
-    }
-
-    // Create the new server.
-    s, err := network.NewServer(opts)
-
-    // Log any errors that occurred during server creation.
-    if err != nil {
-        Logger.Log(
-            "Error", err,
-        )
-    }
-
-    // Return the new server.
-    return s
 }
 
 

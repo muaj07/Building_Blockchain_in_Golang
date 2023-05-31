@@ -11,9 +11,12 @@ type Hasher [T any] interface {
 
 type BlockHasher struct {}
 
+// Hash calculates the hash of a header block.
 func (BlockHasher) Hash(b *Header) types.Hash {
-	h := sha256.Sum256(b.Bytes())
-	return types.Hash(h)
+    // Convert the header block to bytes and hash them with SHA256.
+    h := sha256.Sum256(b.Bytes())
+    // Return the resulting hash as a types.Hash.
+    return types.Hash(h)
 }
 
 type TxHasher struct{}
