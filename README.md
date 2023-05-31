@@ -15,7 +15,7 @@ make run
 ## Details of the code
 
 The **main.go"" file contains example code for bootstrapping the blockchain. Here are the main steps for kicking-off the network:
-> 1. use the --makeServer-- function to create a instant of server. For instance ***makeServer("LOCAL_NODE", &privKey, ":3000", []string{":4000"})***.
+> 1. use the __makeServer__ function to create a instant of server. For instance ***makeServer("LOCAL_NODE", &privKey, ":3000", []string{":4000"})***.
 > This will instantiate **Server** instant, using the code in the --network-- package/folder.
 > 2. start a --Goroutine-- of the new **Server** instant, for instance, ***go localNode.Start()***
 
