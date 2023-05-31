@@ -18,4 +18,7 @@ The **main.go** file contains example code for bootstrapping the blockchain. Her
 > 1. use the __makeServer__ function to create a instant of server. For instance ***makeServer("LOCAL_NODE", &privKey, ":3000", []string{":4000"})***.
 > This will instantiate **Server** instant, using the code in the __network__ package/folder.
 > 2. start a _Goroutine_ of the new **Server** instant, for instance, ***go localNode.Start()***
+> 3. __select{}__ block the main thread to keep the program running indefinitely.
+>
+> For more details about each folder/package, check the ***README.md*** in these folders/packages.
 
