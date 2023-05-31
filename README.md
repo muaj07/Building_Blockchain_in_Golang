@@ -4,7 +4,8 @@ This repository contains code for a basic blockchain written in Golang, which ca
 
 ## Requirements
 > [makefile](https://www.gnu.org/software/make/manual/make.html)
-> [Go 1.18 or above] (https://go.dev/)
+> 
+> [Go 1.18 or above](https://go.dev/)
 
 ## Running the blockchain
 > Run the following command:
