@@ -13,7 +13,7 @@ type Transaction struct {
 	//Cached version of the tx data Hash
 	// We don't want them public
 	hash types.Hash
-	firstSeen int64
+	firstSeen int64 //For FIFO 
 }
 
 
@@ -52,7 +52,7 @@ func (tx *Transaction) Sign(privkey crypto.PrivateKey) error{
 	return nil
 }
 
-// Verify the trx by checking
+// Verify the tx by checking
 // if the "transaction signature" exist and then
 // if the transaction is signed by the correct private key
 

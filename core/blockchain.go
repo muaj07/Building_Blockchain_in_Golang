@@ -89,10 +89,11 @@ func (bc *Blockchain) AddBlockWithoutValidation(b *Block) error {
     bc.headers = append(bc.headers, b.Header) // append the block's header to the headers slice
 	bc.lock.Unlock()
 	bc.logger.Log (
-		"Msg", "New Block",
+		//"addr", bc.
+		"msg", "New Block",
 		"Hash", b.Hash(BlockHasher{}),
-		"Height", b.Height,
-		"Transactions", len(b.Transactions), 
+		"Block Height", b.Height,
+		"Number of Transactions", len(b.Transactions), 
 	)
     return bc.store.Put(b) // store the block in the blockchain's store
 }

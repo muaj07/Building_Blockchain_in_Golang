@@ -2,7 +2,6 @@ package core
 
 import (
 	"github.com/muaj07/transport/types"
-    //"fmt"
 )
 // GenesisBlock creates and returns the first block of the blockchain.
 func GenesisBlock() *Block {

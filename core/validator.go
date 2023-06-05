@@ -5,6 +5,7 @@ import (
 )
 
 var ErrBlockKnown = errors.New("Block Already Known")
+
 type Validator interface {
 	// ValidateBlock checks if a given block is valid
 	ValidateBlock(*Block) error
@@ -41,7 +42,7 @@ func (bv *BlockValidator) ValidateBlock(b *Block) error {
 
     if bv.bc.HasBlock(b.Height) {
 		return ErrBlockKnown
-        //return fmt.Errorf("Chain already contains Block#%d with Hash ==> %s", b.Height, b.Hash(BlockHasher{}))
+
     }
 	if b.Height != bv.bc.Height()+1{
 		return fmt.Errorf("Block ==> %s with Height # %d is too high, Current height ==>%d)", b.Hash(BlockHasher{}), b.Height, bv.bc.Height()+1)
@@ -58,6 +59,6 @@ func (bv *BlockValidator) ValidateBlock(b *Block) error {
     if err := b.Verify(); err!= nil{
         return err
     }
-	fmt.Printf("Done Basic Verification for Block#%d\n", b.Height)
+	fmt.Printf("Done Basic Verification for Block #%d\n", b.Height)
     return nil
 }

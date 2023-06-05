@@ -3,6 +3,7 @@ import(
 	"net"
 	"fmt"
 	"bytes"
+    "sync"
 )
 
 
@@ -46,6 +47,7 @@ func (p *TCPPeer) readLoop(rpcCh chan RPC) {
 
 
 type TCPTransport struct {
+    lock sync.RWMutex
 	peerCh chan *TCPPeer
 	listenAddr string
 	listener net.Listener
@@ -93,7 +95,6 @@ func (t *TCPTransport) acceptLoop() {
             fmt.Printf("Accept error from %+v\n", conn)
             continue
         }
-
         // Create a new TCPPeer for the connection
         peer := &TCPPeer{
             conn: conn,
@@ -103,10 +104,41 @@ func (t *TCPTransport) acceptLoop() {
         t.peerCh <- peer
 
         // Log the new incoming connection
-        fmt.Printf("New Incoming TCP Connection %+v\n", conn)
+        fmt.Printf("Accepted new Incoming TCP Connection %+v\n", conn)
 
         
     }
 }
 
+// SendMessage sends an RPC message to the specified peer.
+// The `to` parameter is the address of the peer.
+// The `payload` parameter is the Data to send.
+// func (t *TCPTransport) SendMessage(to net.Addr, payload []byte) error {
+//     // Lock the peers map to prevent concurrent access.
+//     t.lock.RLock()
+//     defer t.lock.RUnlock()
+//     if t.listenAddr==to.String(){
+//         return nil
+//     }
+
+//     // // Attempt to find the Peer to send the message
+//     // peer, ok := t.peerCh
+//     // if !ok {
+//     //     return fmt.Errorf("Error! %s could not send Msg to unknown Peer: %s", t.listenAddr, to)
+//     // }
+
+//     // Send the message via the peer's ConsumeCh channel
+//     //func ResolveTCPAddr(network address string) (*TCPAddr, error)
+//     addr, err := net.ResolveTCPAddr("tcp", t.listenAddr)
+//     if err !=nil{
+//         fmt.Println("Error in converting string to TCP address", err)
+//         return err
+//     }
+//     t.peerCh.readLoop(RPC {
+//         From: addr,
+//         Payload: bytes.NewReader(payload),
+//     })
+//     // Return nil to indicate success.
+//     return nil
+// }
 
