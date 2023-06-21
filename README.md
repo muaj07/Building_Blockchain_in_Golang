@@ -78,6 +78,6 @@ This project is open source and available under the MIT License.
 GitHub: @muaj07
 
 ### Acknowledgments
-The Go Programming Language
-Blockchain Technology
+- The Go Programming Language
+- Blockchain Technology
 
