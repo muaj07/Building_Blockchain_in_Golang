@@ -57,7 +57,7 @@ This repository contains a simple implementation of a blockchain network using G
 
 2. Run the main.go file:
    
-   ```go run main.go
+   go run main.go
    
 This will start a local node server and two remote nodes. The local node communicates with the remote nodes over the network.
 
